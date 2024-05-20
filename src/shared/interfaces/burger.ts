@@ -14,3 +14,12 @@ export type BurgerDados = {
   status: string
   msg: string
 }
+
+export interface IBurger {
+  id: string
+  nome: string
+  carne: string
+  pao: string
+  opcionais: IIngrediente[]
+  status: string
+}

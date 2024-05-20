@@ -1,48 +1,32 @@
 <script setup lang="ts">
 import Message from './Message.vue'
 
-import { ref, onMounted } from 'vue'
+import BurgerService from '../services/burger'
 
-const burgers = ref(null)
-const status = ref([])
+import { status } from '../shared/constants/burger'
+
+import { ref } from 'vue'
+
+const { getBugers, updateBurger, deleteBurger } = BurgerService()
+
+let burgers = ref(getBugers())
+const burgerStatus = ref(status)
 const msg = ref('')
 
-const getPedidos = async () => {
-  const req = await fetch('http://api/burgers')
-  const data = await req.json()
-  burgers.value = data
-  getStatus()
-}
-
-const getStatus = async () => {
-  const req = await fetch('http://api/status')
-  const data = await req.json()
-  status.value = data
-}
-
-const deleteBurger = async (id) => {
-  await fetch(`http://api/burgers/${id}`, { method: 'DELETE' })
+const onDeleteBurger = async (id) => {
+  deleteBurger(id)
   msg.value = `Pedido removido com sucesso!`
   setTimeout(() => (msg.value = ''), 3000)
-  getPedidos()
+  burgers = ref(getBugers())
 }
 
-const updateBurger = async (event, id) => {
-  const option = event.target.value
-  const dataJson = JSON.stringify({ status: option })
-  const req = await fetch(`http://api/burgers/${id}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: dataJson
-  })
-  const res = await req.json()
-  msg.value = `O pedido Nº ${res.id} foi atualizado para ${res.status}`
+const onUpdateBurger = async (event, burger) => {
+  const status = event.target.value
+  updateBurger(burger, status)
+
+  msg.value = `O pedido foi atualizado`
   setTimeout(() => (msg.value = ''), 3000)
 }
-
-onMounted(() => {
-  getPedidos()
-})
 </script>
 
 <template>
@@ -71,17 +55,21 @@ onMounted(() => {
           <div v-if="!burger.opcionais.length">Não informado</div>
         </div>
         <div class="button-container">
-          <select name="status" class="status" @change="(event) => updateBurger(event, burger.id)">
+          <select
+            name="burgerStatus"
+            class="burgerStatus"
+            @change="(event) => onUpdateBurger(event, burger)"
+          >
             <option
               :value="s.tipo"
-              v-for="s in status"
+              v-for="s in burgerStatus"
               :key="s.id"
               :selected="burger.status == s.tipo"
             >
               {{ s.tipo }}
             </option>
           </select>
-          <button class="delete-btn" @click="deleteBurger(burger.id)">Cancelar</button>
+          <button class="delete-btn" @click="onDeleteBurger(burger.id)">Cancelar</button>
         </div>
       </div>
     </div>

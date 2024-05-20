@@ -1,10 +1,16 @@
 
 <script setup lang="ts">
-import { onMounted, reactive } from 'vue'
+import { reactive } from 'vue'
+
+import Message from './Message.vue'
 
 import type { BurgerDados } from '../shared/interfaces/burger'
 
-import Message from './Message.vue'
+import BurgerService from '../services/burger'
+
+import { ingredientes } from '../shared/constants/burger'
+
+const { createBurger } = BurgerService()
 
 const burgerData: BurgerDados = reactive({
   paes: [],
@@ -18,16 +24,7 @@ const burgerData: BurgerDados = reactive({
   msg: ''
 })
 
-const getIngredientes = async () => {
-  const req = await fetch('http://api/ingredientes')
-  const data = await req.json()
-
-  burgerData.paes = data.paes
-  burgerData.carnes = data.carnes
-  burgerData.opcionaisdata = data.opcionais
-}
-
-const createBurger = async (e: any) => {
+const onCreateBurger = async (e: any) => {
   e.preventDefault()
 
   if (!burgerData.nome.trim() || !burgerData.carne || !burgerData.pao) {
@@ -43,17 +40,9 @@ const createBurger = async (e: any) => {
     status: 'Solicitado'
   }
 
-  const dataJson = JSON.stringify(data)
+  createBurger(data)
 
-  const req = await fetch('http://api/burgers', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: dataJson
-  })
-
-  const res = await req.json()
-
-  burgerData.msg = `Pedido Nº ${res.id} realizado com sucesso!`
+  burgerData.msg = `Pedido realizado com sucesso!`
 
   setTimeout(() => (burgerData.msg = ''), 3000)
 
@@ -62,16 +51,12 @@ const createBurger = async (e: any) => {
   burgerData.pao = ''
   burgerData.opcionais = []
 }
-
-onMounted(async () => {
-  await getIngredientes()
-})
 </script>
   
   <template>
   <Message :msg="burgerData.msg" v-show="burgerData.msg" />
   <div>
-    <form id="burger-form" method="POST" @submit="createBurger">
+    <form id="burger-form" method="POST" @submit="onCreateBurger">
       <div class="input-container">
         <label for="nome">Nome do cliente:</label>
         <input
@@ -86,7 +71,7 @@ onMounted(async () => {
         <label for="pao">Escolha o pão:</label>
         <select name="pao" id="pao" v-model="burgerData.pao">
           <option value="">Selecione o seu pão</option>
-          <option v-for="pao in burgerData.paes" :key="pao.id" :value="pao.tipo">
+          <option v-for="pao in ingredientes.paes" :key="pao.id" :value="pao.tipo">
             {{ pao.tipo }}
           </option>
         </select>
@@ -95,7 +80,7 @@ onMounted(async () => {
         <label for="carne">Escolha a carne do seu Burger:</label>
         <select name="carne" id="carne" v-model="burgerData.carne">
           <option value="">Selecione o tipo de carne</option>
-          <option v-for="carne in burgerData.carnes" :key="carne.id" :value="carne.tipo">
+          <option v-for="carne in ingredientes.carnes" :key="carne.id" :value="carne.tipo">
             {{ carne.tipo }}
           </option>
         </select>
@@ -105,7 +90,7 @@ onMounted(async () => {
         <div id="opcionais-container">
           <div
             class="checkbox-container"
-            v-for="opcional in burgerData.opcionaisdata"
+            v-for="opcional in ingredientes.opcionais"
             :key="opcional.id"
           >
             <input
