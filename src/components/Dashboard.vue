@@ -8,20 +8,20 @@ const status = ref([])
 const msg = ref('')
 
 const getPedidos = async () => {
-  const req = await fetch('http://localhost:3000/burgers')
+  const req = await fetch('http://api/burgers')
   const data = await req.json()
   burgers.value = data
   getStatus()
 }
 
 const getStatus = async () => {
-  const req = await fetch('http://localhost:3000/status')
+  const req = await fetch('http://api/status')
   const data = await req.json()
   status.value = data
 }
 
 const deleteBurger = async (id) => {
-  await fetch(`http://localhost:3000/burgers/${id}`, { method: 'DELETE' })
+  await fetch(`http://api/burgers/${id}`, { method: 'DELETE' })
   msg.value = `Pedido removido com sucesso!`
   setTimeout(() => (msg.value = ''), 3000)
   getPedidos()
@@ -30,7 +30,7 @@ const deleteBurger = async (id) => {
 const updateBurger = async (event, id) => {
   const option = event.target.value
   const dataJson = JSON.stringify({ status: option })
-  const req = await fetch(`http://localhost:3000/burgers/${id}`, {
+  const req = await fetch(`http://api/burgers/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: dataJson

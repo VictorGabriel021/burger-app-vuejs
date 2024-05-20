@@ -19,7 +19,7 @@ const burgerData: BurgerDados = reactive({
 })
 
 const getIngredientes = async () => {
-  const req = await fetch('http://localhost:3000/ingredientes')
+  const req = await fetch('http://api/ingredientes')
   const data = await req.json()
 
   burgerData.paes = data.paes
@@ -45,7 +45,7 @@ const createBurger = async (e: any) => {
 
   const dataJson = JSON.stringify(data)
 
-  const req = await fetch('http://localhost:3000/burgers', {
+  const req = await fetch('http://api/burgers', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: dataJson
